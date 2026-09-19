@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - To-Do Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>TaskFlow</h1>
+        <p>Organize your tasks. Get things done.</p>
+    </header>
+
+    <section class="task-form">
+        <h2>Add New Task</h2>
+
+        <form action="/add" method="POST">
+
+            <input
+                type="text"
+                name="title"
+                placeholder="Enter your task..."
+                required
+            >
+
+            <select name="priority">
+                <option value="Low">Low Priority</option>
+                <option value="Medium" selected>Medium Priority</option>
+                <option value="High">High Priority</option>
+            </select>
+
+            <input
+                type="date"
+                name="due_date"
+            >
+
+            <button type="submit">Add Task</button>
+
+        </form>
+    </section>
+
+    <section class="task-section">
+
+        <div class="section-header">
+            <h2>My Tasks</h2>
+            <span>{{ tasks|length }} Tasks</span>
+        </div>
+
+        {% if tasks %}
+
+            {% for task in tasks %}
+
+            <div class="task-card {% if task['completed'] %}completed{% endif %}">
+
+                <div class="task-info">
+
+                    <h3>{{ task['title'] }}</h3>
+
+                    <div class="task-details">
+
+                        <span class="priority {{ task['priority']|lower }}">
+                            {{ task['priority'] }}
+                        </span>
+
+                        {% if task['due_date'] %}
+                        <span class="due-date">
+                            Due: {{ task['due_date'] }}
+                        </span>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <div class="task-actions">
+
+                    <a
+                        href="/complete/{{ task['id'] }}"
+                        class="complete-btn"
+                    >
+                        {% if task['completed'] %}
+                            Undo
+                        {% else %}
+                            Complete
+                        {% endif %}
+                    </a>
+
+                    <button
+                        onclick="editTask(
+                            {{ task['id'] }},
+                            '{{ task['title']|replace("'", "\\'") }}',
+                            '{{ task['priority'] }}',
+                            '{{ task['due_date'] or '' }}'
+                        )"
+                        class="edit-btn"
+                    >
+                        Edit
+                    </button>
+
+                    <a
+                        href="/delete/{{ task['id'] }}"
+                        class="delete-btn"
+                        onclick="return confirm('Delete this task?')"
+                    >
+                        Delete
+                    </a>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-state">
+                <h3>No tasks yet</h3>
+                <p>Add your first task above to get started.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<div id="editModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <h2>Edit Task</h2>
+
+        <form id="editForm" method="POST">
+
+            <input
+                type="text"
+                id="editTitle"
+                name="title"
+                required
+            >
+
+            <select id="editPriority" name="priority">
+
+                <option value="Low">Low Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="High">High Priority</option>
+
+            </select>
+
+            <input
+                type="date"
+                id="editDueDate"
+                name="due_date"
+            >
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
